@@ -80,18 +80,19 @@ class PreAuditObserver {
                 if (data.txType === "buy") {
                     // buy trade
                     PreAuditObserver.#memory[id].observeData.buys++;
-                    PreAuditObserver.#memory[id].observeData.holders[actor] = data.remaining_sol_amt;
+                    PreAuditObserver.#memory[id].observeData.holders[actor] = data.newTokenBalance;
                 }
                 else {
                     // sell trade
                     PreAuditObserver.#memory[id].observeData.sells++;
-                    PreAuditObserver.#memory[id].observeData.holders[actor] -= data.solAmount;
+                    PreAuditObserver.#memory[id].observeData.holders[actor] -= data.tokenAmount;
                     // TODO - update to represent actual remaining sol amt below...and above, use actual from data
-                    PreAuditObserver.#memory[id].observeData.holders[actor] = data.remaining_sol_amt;
-                    if (data.remaining_sol_amt === 0) {
+                    PreAuditObserver.#memory[id].observeData.holders[actor] = data.newTokenBalance;
+                    if (data.newTokenBalance <= 0) {
                         delete PreAuditObserver.#memory[id].observeData.holders[actor];
                     }
                 }
+                const mcSol = data.marketCapSol;
                 // TODO - keep track of market cap
                 // TODO - update market cap, convert to USD and check if audit should be triggered or not
                 // TODO -  before audit is triggered, calculate total supply so as to determine percentages of each holder to use in audit

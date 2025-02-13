@@ -22,6 +22,8 @@ class Site {
     static PAO_SELF_DES_TIMEOUT_MS = parseInt(process.env.PAO_SELF_DES_TIMEOUT_MS || "10000");
     static PAO_SELF_DES_INTERVAL_MS  = parseInt(process.env.PAO_SELF_DES_INTERVAL_MS || "2000");
     static PAO_MAX_TOKENS = parseInt(process.env.PAO_MAX_TOKENS || "10") || Infinity;
+    static SOLPRICE_API = process.env.SOLPRICE_API ?? "";
+    static SOLPRICE_INTERVAL_MS = parseInt(process.env.SOLPRICE_INTERVAL_MS || "60000");
 }
 
 module.exports = Site;
