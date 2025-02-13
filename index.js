@@ -45,10 +45,6 @@ const proceedAfterInit = () => {
             }
         }
     });
-
-    setInterval(() => {
-        Blacklist.add(Date.now().toString());
-    }, 1000);
 }
 
 process.on('exit', (code) => {
