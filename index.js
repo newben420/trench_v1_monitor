@@ -5,6 +5,7 @@ const Persistence = require("./lib/persistence");
 const WebSocket = require('ws');
 const JSP = require("./lib/json_safe_parse");
 const Site = require("./env");
+const Blacklist = require("./engine/blacklist");
 
 /**
  * This is called if initialization is successful, to continue setting up.
@@ -35,7 +36,13 @@ const proceedAfterInit = () => {
             Log.flow(`WebSocket > Message > ${message.message}`, 4);
         }
         else{
-            console.log(message);
+            if(message.txType == "create"){
+                if(!Blacklist.check(message.traderPublicKey)){
+                    // Creator of this token is not blacklisted.
+                    console.log(message);
+                }
+                
+            }
         }
     });
 }
