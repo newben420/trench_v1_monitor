@@ -123,9 +123,8 @@ class PreAuditObserver {
                 if (PreAuditObserver.#memory[id].observeData.mc >= Site.PAO_MIN_MARKET_CAP) {
                     // Market cap limit reached
                     let row = structuredClone({
-                        launchData: PreAuditObserver.#memory[id].launchData,
+                        launchData: {...PreAuditObserver.#memory[id].launchData, mint: id},
                         observeData: PreAuditObserver.#memory[id].observeData,
-                        id: id,
                         totalSupply: 1,
                     });
                     PreAuditObserver.#stopObservation(id);

@@ -24,6 +24,7 @@ class Site {
     static PAO_MAX_TOKENS = parseInt(process.env.PAO_MAX_TOKENS || "10") || Infinity;
     static SOLPRICE_API = process.env.SOLPRICE_API ?? "";
     static SOLPRICE_INTERVAL_MS = parseInt(process.env.SOLPRICE_INTERVAL_MS || "60000");
+    static AU_CREATOR_OTHER_TOKENS_MC_THRESH = parseFloat(process.env.AU_CREATOR_OTHER_TOKENS_MC_THRESH || "100000");
 }
 
 module.exports = Site;

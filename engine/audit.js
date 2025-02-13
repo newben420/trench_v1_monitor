@@ -1,4 +1,8 @@
+const Site = require("../env");
 const Log = require("../lib/log");
+const { get } = require("../lib/make_request");
+const { Res } = require("../lib/res");
+const SolPrice = require("../lib/sol_price");
 
 /**
  * Audit class
@@ -27,15 +31,49 @@ class Audit {
     /**
      * Runs audit on queue
      */
-    static #run = () => {
+    static #run = async () => {
         if (Audit.#isRunning) {
             return;
         }
         Audit.#isRunning = true;
         while (Audit.#queue.length > 0) {
             const data = Audit.#queue.shift();
+            const { launchData, observeData, totalSupply, cirSupply } = data;
             Log.flow(`Audit > '${data.launchData.name}'.`, 1);
-            // TODO - CONTINUE FROM HERE
+            console.log(data);
+            // prerequites
+            let banCreator = false;
+            let errorMessage = "";
+            let compute = {
+                deployerHasOtherTokens: false,
+                deployerTotalTokens: 1,
+                deployAllTokensAboveMCTheshPerc: 0,
+            };
+
+            // audit functions
+            const checkDeployerOtherTokens = () => {
+                return new Promise((fx, reject) => {
+                    get(`${Site.SOLPRICE_API}/coins/user-created-coins/${launchData.traderPublicKey}?limit=2000&offset=0`, res => {
+                        if (!res.succ) {
+                            fx(res);
+                        }
+                        else {
+                            let totalTokens = res.message.length;
+                            compute.deployerHasOtherTokens = totalTokens > 1;
+                            compute.deployerTotalTokens = totalTokens;
+                            let ratio = res.message.filter(token => (parseFloat(token.market_cap) * SolPrice.get()) >= Site.AU_CREATOR_OTHER_TOKENS_MC_THRESH).length / totalTokens;
+                            compute.deployAllTokensAboveMCTheshPerc = ratio / totalTokens * 100;
+                            fx(new Res(true));
+                        }
+                    });
+                });
+            }
+
+            // audit flows
+            let audit = ((await checkDeployerOtherTokens()).succ);
+            console.log(audit);
+            console.log(compute);
+            
         }
         Audit.#isRunning = false;
     }
