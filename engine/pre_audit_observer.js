@@ -61,11 +61,12 @@ class PreAuditObserver {
             PreAuditObserver.#memory[id].observeData = {
                 buys: 0,
                 sells: 0,
-                holders: [],
+                holders: {},
                 mc: data.marketCapSol ?? 0,
                 startTime: Date.now(),
                 lastUpdated: Date.now(),
             };
+            PreAuditObserver.#memory[id].observeData.holders[id] = data.initialBuy;
             PreAuditObserver.#startObservation(id);
         }
     }
@@ -75,7 +76,13 @@ class PreAuditObserver {
             const id = data.mint;
             if (PreAuditObserver.#memory[id]){
                 PreAuditObserver.#memory[id].observeData.lastUpdated = Date.now();
-                // TODO
+                if(data.txType === "buy"){
+                    // buy trade
+                }
+                else{
+                    // sell trade
+                }
+                // TODO - keep track of market cap, number of buys, number of sells, holders and the amount of token they are holding
             }
         }
         console.log(data);
