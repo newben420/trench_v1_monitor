@@ -74,17 +74,30 @@ class PreAuditObserver {
     static newTrade = (data) => {
         if (data.txType === "buy" || data.txType === "sell") {
             const id = data.mint;
-            if (PreAuditObserver.#memory[id]){
+            const actor = data.traderPublicKey;
+            if (PreAuditObserver.#memory[id]) {
                 PreAuditObserver.#memory[id].observeData.lastUpdated = Date.now();
-                if(data.txType === "buy"){
+                if (data.txType === "buy") {
                     // buy trade
+                    PreAuditObserver.#memory[id].observeData.buys++;
+                    PreAuditObserver.#memory[id].observeData.holders[actor] = data.remaining_sol_amt;
                 }
-                else{
+                else {
                     // sell trade
+                    PreAuditObserver.#memory[id].observeData.sells++;
+                    PreAuditObserver.#memory[id].observeData.holders[actor] -= data.solAmount;
+                    // TODO - update to represent actual remaining sol amt below...and above, use actual from data
+                    PreAuditObserver.#memory[id].observeData.holders[actor] = data.remaining_sol_amt;
+                    if (data.remaining_sol_amt === 0) {
+                        delete PreAuditObserver.#memory[id].observeData.holders[actor];
+                    }
                 }
-                // TODO - keep track of market cap, number of buys, number of sells, holders and the amount of token they are holding
+                // TODO - keep track of market cap
+                // TODO - update market cap, convert to USD and check if audit should be triggered or not
+                // TODO -  before audit is triggered, calculate total supply so as to determine percentages of each holder to use in audit
             }
         }
+        // TODO - remove below console.log when no longer needed
         console.log(data);
     }
 }
