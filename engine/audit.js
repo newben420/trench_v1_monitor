@@ -48,6 +48,7 @@ class Audit {
                 deployerHasOtherTokens: false,
                 deployerTotalTokens: 1,
                 deployAllTokensAboveMCTheshPerc: 0,
+                deployerSoldSome: false,
             };
 
             // audit functions
@@ -69,9 +70,15 @@ class Audit {
                 });
             }
 
+            checkIfDeployerSoldSome = () => {
+                compute.deployerSoldSome = (cirSupply * (observeData.holders[launchData.traderPublicKey] ?? 0)) < launchData.initialBuy;
+                return compute.deployerSoldSome;
+            }
+
             // audit flows
-            let audit = ((await checkDeployerOtherTokens()).succ);
-            console.log(audit);
+            const succDepOtherTokens = await checkDeployerOtherTokens();
+            const depSoldSome = checkIfDeployerSoldSome();
+            console.log(succDepOtherTokens, depSoldSome);
             console.log(compute);
             
         }
