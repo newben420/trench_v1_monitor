@@ -10,6 +10,7 @@ class BlacklistDriver {
 
     static #list = [];
     static #path = path.resolve(Site.PERSISTENCE_DIRECTORY, "blacklist.json");
+    static #changes = false;
 
     /**
      * Adds creator address to blacklist
@@ -20,6 +21,7 @@ class BlacklistDriver {
         return new Promise((resolve, reject) => {
             if (BlacklistDriver.#list.indexOf(address) === -1) {
                 BlacklistDriver.#list.push(address);
+                BlacklistDriver.#changes = true;
             }
             resolve(true);
         });
@@ -35,6 +37,7 @@ class BlacklistDriver {
             const index = BlacklistDriver.#list.indexOf(address);
             if (index !== -1) {
                 BlacklistDriver.#list.splice(index, 1);
+                BlacklistDriver.#changes = true;
             }
             resolve(true);
         });
@@ -48,7 +51,7 @@ class BlacklistDriver {
     static check = (address) => BlacklistDriver.#list.indexOf(address) !== -1;
 
     /**
-     * Ensures the driver is initialized
+     * Ensures the driver is initialized.
      * @returns {Promise<boolean>}
      */
     static init = () => {
@@ -73,8 +76,8 @@ class BlacklistDriver {
     }
 
     /**
-     * 
-     * @param {boolean} exit - if called on process exit; 
+     * Persists driver data.
+     * @param {boolean} exit - if called on process exit.
      * @returns {Promise<boolean>}
      */
     static save = (exit = false) => {
@@ -82,13 +85,14 @@ class BlacklistDriver {
             fs.writeFileSync(BlacklistDriver.#path, JSON.stringify(BlacklistDriver.#list), "utf8");
         }
         return new Promise((resolve, reject) => {
-            if(!exit){
+            if(!exit && BlacklistDriver.#changes){
                 fs.writeFile(BlacklistDriver.#path, JSON.stringify(BlacklistDriver.#list), "utf8", (err) => {
                     if (err) {
                         Log.dev(err);
                         resolve(false);
                     }
                     else {
+                        BlacklistDriver.#changes = false;
                         resolve(true);
                     }
                 });
