@@ -8,7 +8,6 @@ const Log = require("./../lib/log");
  */
 class BlacklistDriver {
 
-
     static #list = [];
     static #path = path.resolve(Site.PERSISTENCE_DIRECTORY, "blacklist.json");
 
@@ -74,13 +73,9 @@ class BlacklistDriver {
     }
 
     /**
-     * Persists current driver state.
-     * @returns {Promise<boolean>}
-     */
-    /**
      * 
      * @param {boolean} exit - if called on process exit; 
-     * @returns {Promise<boolean> | void}
+     * @returns {Promise<boolean>}
      */
     static save = (exit = false) => {
         if(exit){
