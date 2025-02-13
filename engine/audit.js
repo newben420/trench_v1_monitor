@@ -1,3 +1,9 @@
+const Log = require("../lib/log");
+
+/**
+ * Audit class
+ * This class is responsible for auditing tokens.
+ */
 class Audit {
     /**
      * @type {any[]}
@@ -28,7 +34,8 @@ class Audit {
         Audit.#isRunning = true;
         while (Audit.#queue.length > 0) {
             const data = Audit.#queue.shift();
-            // TODO
+            Log.flow(`Audit > '${data.launchData.name}'.`, 1);
+            // TODO - CONTINUE FROM HERE
         }
         Audit.#isRunning = false;
     }

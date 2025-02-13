@@ -2,7 +2,13 @@ const WebSocket = require('ws');
 const Site = require("./../env");
 const Log = require('../lib/log');
 const SolPrice = require('../lib/sol_price');
+const { get } = require('../lib/make_request');
+const Audit = require('./audit');
 
+/**
+ * Pre-audit observer class.
+ * This class observes token creation and trade events to determine if a token has fulfilled predefined conditions and is ready for audit.
+ */
 class PreAuditObserver {
     /**
      *@type {WebSocket}
@@ -19,6 +25,10 @@ class PreAuditObserver {
         PreAuditObserver.#ws = ws;
     }
 
+    /**
+     * Stops observing a token.
+     * @param {string} id - Token mint address.
+     */
     static #stopObservation = (id) => {
         if (PreAuditObserver.#memory[id]) {
             let payload = {
@@ -34,6 +44,10 @@ class PreAuditObserver {
 
     }
 
+    /**
+    * Starts observing a token.
+    * @param {string} id - Token mint address.
+    */
     static #startObservation = (id) => {
         let payload = {
             method: "subscribeTokenTrade",
@@ -43,6 +57,10 @@ class PreAuditObserver {
         Log.flow(`PAO > Now observing '${PreAuditObserver.#memory[id].launchData.name}' at MC $${PreAuditObserver.#memory[id].observeData.mc}.`, 3);
     }
 
+    /**
+     * Called when a new token is created.
+     * @param {any} data - New token data. 
+     */
     static newToken = (data) => {
         const tokensObserved = Object.keys(PreAuditObserver.#memory).length;
         if (tokensObserved < Site.PAO_MAX_TOKENS) {
@@ -71,12 +89,13 @@ class PreAuditObserver {
             };
             PreAuditObserver.#memory[id].observeData.holders[data.traderPublicKey.toString()] = data.initialBuy;
             PreAuditObserver.#startObservation(id);
-            // console.log(PreAuditObserver.#memory[id].observeData);
-            // console.log(data);
-            // console.log({ ...PreAuditObserver.#memory[id].observeData, holders: undefined });
         }
     }
 
+    /**
+     * Called when a new trade is made on observed token.
+     * @param {*} data - Trade data.
+     */
     static newTrade = (data) => {
         if (data.txType === "buy" || data.txType === "sell") {
             const id = data.mint.toString();
@@ -101,13 +120,28 @@ class PreAuditObserver {
                 PreAuditObserver.#memory[id].observeData.mc = mcSol * SolPrice.get();
                 PreAuditObserver.#memory[id].observeData.mcSol = mcSol;
                 PreAuditObserver.#memory[id].observeData.price = data.solAmount / data.tokenAmount;
-                // console.log({ ...PreAuditObserver.#memory[id].observeData, holders: [] });
-                // TODO - update market cap, convert to USD and check if audit should be triggered or not
-                // TODO -  before audit is triggered, calculate total supply so as to determine percentages of each holder to use in audit
+                if (PreAuditObserver.#memory[id].observeData.mc >= Site.PAO_MIN_MARKET_CAP) {
+                    // Market cap limit reached
+                    let row = structuredClone({
+                        launchData: PreAuditObserver.#memory[id].launchData,
+                        observeData: PreAuditObserver.#memory[id].observeData,
+                        id: id,
+                        totalSupply: 1,
+                    });
+                    PreAuditObserver.#stopObservation(id);
+                    get(Site.SOLPRICE_API + "/coins/" + id, res => {
+                        if (res.succ) {
+                            row.totalSupply = res.message.total_supply;
+                        }
+                        row.cirSupply = Object.keys(row.observeData.holders).reduce((sum, key) => sum + row.observeData.holders[key], 0);
+                        Object.keys(row.observeData.holders).forEach(key => {
+                            row.observeData.holders[key] = (row.observeData.holders[key] / row.cirSupply) * 100;
+                        });
+                        Audit.addToQueue(row);
+                    });
+                }
             }
         }
-        // TODO - remove below console.log when no longer needed
-        // console.log(data);
     }
 }
 

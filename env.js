@@ -17,7 +17,7 @@ class Site {
     static LAUNCH_MIN_SOL = parseFloat(process.env.LAUNCH_MIN_SOL || "0");
     static LAUNCH_MIN_MC_SOL = parseFloat(process.env.LAUNCH_MIN_MC_SOL || "0");
     static LAUNCH_MIN_SOL_BD = parseFloat(process.env.LAUNCH_MIN_SOL_BD || "0");
-    static PAO_MIN_MARKET_CA = parseFloat(process.env.PAO_MIN_MARKET_CA || "100000");
+    static PAO_MIN_MARKET_CAP = parseFloat(process.env.PAO_MIN_MARKET_CAP || "100000");
     static PAO_TIMEOUT_MS = parseInt(process.env.PAO_TIMEOUT_MS || "360000");
     static PAO_SELF_DES_TIMEOUT_MS = parseInt(process.env.PAO_SELF_DES_TIMEOUT_MS || "10000");
     static PAO_SELF_DES_INTERVAL_MS  = parseInt(process.env.PAO_SELF_DES_INTERVAL_MS || "2000");
