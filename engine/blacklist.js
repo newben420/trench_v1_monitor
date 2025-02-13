@@ -82,7 +82,9 @@ class BlacklistDriver {
      */
     static save = (exit = false) => {
         if(exit){
-            fs.writeFileSync(BlacklistDriver.#path, JSON.stringify(BlacklistDriver.#list), "utf8");
+            if(BlacklistDriver.#changes){
+                fs.writeFileSync(BlacklistDriver.#path, JSON.stringify(BlacklistDriver.#list), "utf8");
+            }
         }
         return new Promise((resolve, reject) => {
             if(!exit && BlacklistDriver.#changes){

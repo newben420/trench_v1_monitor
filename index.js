@@ -6,6 +6,7 @@ const WebSocket = require('ws');
 const JSP = require("./lib/json_safe_parse");
 const Site = require("./env");
 const Blacklist = require("./engine/blacklist");
+const PAO = require("./engine/pre_audit_observer");
 
 /**
  * This is called if initialization is successful, to continue setting up.
@@ -13,6 +14,7 @@ const Blacklist = require("./engine/blacklist");
 const proceedAfterInit = () => {
     const ws = new WebSocket(Site.WS_URL);
     ws.on('open', () => {
+        PAO.registerSocket(ws);
         Log.flow(`WebSocket > Connected.`, 4);
         // Subscribing to token creation events
         let payload = {
@@ -32,16 +34,25 @@ const proceedAfterInit = () => {
     ws.on('message', data => {
         const message = JSP(data);
         const keys = Object.keys(message);
-        if(keys.length === 1 && keys[0] === 'message'){
+        if (keys.length === 1 && keys[0] === 'message') {
             Log.flow(`WebSocket > Message > ${message.message}`, 4);
         }
-        else{
-            if(message.txType == "create"){
-                if(!Blacklist.check(message.traderPublicKey)){
+        else {
+            if (message.txType == "create") {
+                // NEW TOKEN
+                if (!Blacklist.check(message.traderPublicKey)) {
                     // Creator of this token is not blacklisted.
-                    console.log(message);
+                    const valid = ((message.solAmount || message.solAmount === 0) ? (message.solAmount >= Site.LAUNCH_MIN_SOL) : false) &&
+                    ((message.marketCapSol || message.marketCapSol === 0) ? (message.marketCapSol >= Site.LAUNCH_MIN_MC_SOL) : false) &&
+                    ((message.vSolInBondingCurve || message.vSolInBondingCurve === 0) ? (message.vSolInBondingCurve >= Site.LAUNCH_MIN_SOL_BD) : false);
+                    if(valid){
+                        PAO.newToken(message);
+                    }
                 }
-                
+            }
+            else{
+                // OTHER SUBSCRIBED TRANSACTIONS
+                PAO.newTrade(message);
             }
         }
     });
