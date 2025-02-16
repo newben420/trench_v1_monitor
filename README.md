@@ -47,7 +47,7 @@ Finished development privately on 16/02/2025 at 18:00. It now runs a token throu
     If audit is passed, a token is then forwarded to PAM, the final stage.
 
 4. **Post-Audit Monitor (PAM)**  
-    This is responsible for analysing the market data of a token, generating entry(buy/open) and exit(sell/close) signals of the token if applicable, logging decisions and PnLs, broadcasting signals to the network, among others.
+    This is responsible for analysing the market data of a token, generating entry(buy/open) and exit(sell/close) signals for the token if applicable, logging decisions and PnLs, broadcasting signals to the network, among others.
 
 A blacklisting mechanism is also implement throughout the component to blacklist developers suspected of rug pulls. Also, a simple UI is implemented.
 
