@@ -33,7 +33,7 @@ Finished development privately on 16/02/2025 at 18:00. It now runs a token throu
     It detects tokens immediately they are launched, and if they meet configured requirements (e.g. Minimum amount of SOL in IntitalBuy or BondingCurve), they get added to the PAO.
 
 2. **Pre-Audit Observer (PAO)**  
-    This monitors tokens and they meet required Marketcap and Volume within a configured timeframe, they get sent to Audit. It discards tokens that stop receiving new data or with expired timeframes. Maximum number of tokens that can be observed at a time can also be configured.
+    This observes tokens upon launch. If they meet required Marketcap and Volume within a configured timeframe, they get sent to Audit. It discards tokens that stop receiving new data or with expired timeframes. Maximum number of tokens that can be observed at a time can also be configured.
 
 3. **Audit**  
     This performs various audit on tokens in its queue based on available data and configured constraints. The audit scope may include:  
